@@ -91,7 +91,7 @@ export async function downloadRules(fetcher = fetch) {
   const block = new Set(), allow = new Set(), sources = [];
   // Fixed official URLs: no user-controlled URL, redirects, or scripts.
   for (const source of SOURCES) {
-    const response = await fetcher(source.url, { redirect: "error", signal: AbortSignal.timeout(15000) });
+    const response = await fetcher(source.url, { redirect: "manual", signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error("Filter download failed");
     const bytes = await readLimited(response.body, 8 * 1024 * 1024);
     if (bytes.length < 200) throw new Error("Filter file too small");

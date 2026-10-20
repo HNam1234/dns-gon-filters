@@ -23,7 +23,7 @@ async function state(env) {
   } else {
     let data = SEED;
     try {
-      const response = await fetch(FEED, { redirect: "error", signal: AbortSignal.timeout(4000),
+      const response = await fetch(FEED, { redirect: "manual", signal: AbortSignal.timeout(4000),
         cf: { cacheTtl: 900, cacheEverything: true } });
       if (!response.ok) throw new Error("Feed unavailable");
       const bytes = await readLimited(response.body, 5 * 1024 * 1024);
@@ -34,7 +34,7 @@ async function state(env) {
       // Keep a newer in-memory data set if GitHub temporarily returns an older cached version.
       if (Date.parse(candidate.updated) >= Date.parse(data.updated)) data = candidate;
       lastRefresh = { status: "ok", time: new Date().toISOString() };
-    } catch {
+    } catch (error) {
       data = cached?.data || SEED;
       lastRefresh = { status: "using-last-known-good", time: new Date().toISOString() };
     }
@@ -106,7 +106,7 @@ export function createHandler(fetcher = fetch) {
       try { query = parseQuery(bytes); } catch { return plain("Invalid DNS message", 400); }
       const current = await state(env);
       if (isBlocked(query.name, current)) return dnsResponse(blockedResponse(query));
-      const upstream = await fetcher(UPSTREAM, { method: "POST", redirect: "error", signal: AbortSignal.timeout(6000),
+      const upstream = await fetcher(UPSTREAM, { method: "POST", redirect: "manual", signal: AbortSignal.timeout(6000),
         headers: { "Content-Type": "application/dns-message", Accept: "application/dns-message" }, body: upstreamQuery(query) });
       if (!upstream.ok || upstream.headers.get("Content-Type")?.split(";")[0] !== "application/dns-message")
         return plain("DNS upstream unavailable", 502);

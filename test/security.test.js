@@ -79,7 +79,7 @@ test("allowed app domains reach only the fixed encrypted upstream without identi
   let calls = 0;
   const handler = createHandler(async (url, options) => {
     calls++; assert.equal(url, "https://cloudflare-dns.com/dns-query");
-    assert.equal(options.method, "POST"); assert.equal(options.redirect, "error");
+    assert.equal(options.method, "POST"); assert.equal(options.redirect, "manual");
     assert.deepEqual(Object.keys(options.headers).sort(), ["Accept", "Content-Type"]);
     return new Response(answer(options.body), { headers: { "Content-Type": "application/dns-message" } });
   });
