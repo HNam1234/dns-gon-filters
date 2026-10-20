@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['src/**', 'scripts/**', 'test/**', 'custom-allowlist.json', '.github/workflows/filters.yml']
+    paths: ['src/**', 'scripts/**', 'test/**', 'custom-allowlist.json', 'custom-blocklist.json', '.github/workflows/filters.yml']
 permissions:
   contents: write
 concurrency:

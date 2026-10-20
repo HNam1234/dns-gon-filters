@@ -1,14 +1,15 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { downloadRules, SOURCES, validDomain } from "../src/filter.js";
+import { downloadRules, SOURCES } from "../src/filter.js";
+import { applyCustomRules } from "./custom-rules.mjs";
 const originals = new Map();
-const data = await downloadRules(async (url, options) => {
+let data = await downloadRules(async (url, options) => {
   const response = await fetch(url, options);
   originals.set(url, response.clone().text());
   return response;
 });
-data.customAllow = JSON.parse(await readFile("custom-allowlist.json", "utf8"));
-if (!Array.isArray(data.customAllow) || data.customAllow.length > 200 || !data.customAllow.every(validDomain))
-  throw new Error("Invalid custom allowlist");
+data = applyCustomRules(data,
+  JSON.parse(await readFile("custom-blocklist.json", "utf8")),
+  JSON.parse(await readFile("custom-allowlist.json", "utf8")));
 await mkdir("data", { recursive: true });
 await writeFile("data/seed.json", JSON.stringify(data));
 await mkdir("source-lists", { recursive: true });

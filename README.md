@@ -8,6 +8,8 @@ This is a newly written minimal DNS service. It is **not** the uBlockDNS server,
 
 Only unconditional `||domain^` rules are converted into DNS blocks. Browser-specific options, paths, cosmetic filters, scriptlets, regex rules and conditional preprocessor branches are excluded. Domain exceptions, including contextual domain exceptions, are treated as global allow rules to reduce breakage. Unbreak contributes exceptions only. This deliberately cannot reproduce full uBlock behavior or guarantee that every normal app feature will work.
 
+`custom-blocklist.json` supplements the upstream lists with reviewed advertising hosts that they miss. These are merged into the daily feed, so they take effect without reinstalling the iOS profile or app. Match the narrowest advertising host: do not add an entire shared hosting platform, image CDN or content site just to block one ad URL. DNS cannot distinguish URL paths or stop a page's inline JavaScript from opening a new tab; a blocked destination can still leave an empty tab or overlay.
+
 DNS blocks apply across apps using the iOS system resolver, subject to VPN/application-specific DNS precedence. YouTube/sponsored ads sharing content domains cannot be separated by DNS alone. Rewarded ads in games may stop working. Source data includes rule counts, hashes, skipped rule counts and attribution. A large rule count does not measure ad-blocking effectiveness.
 
 ## Privacy and access
