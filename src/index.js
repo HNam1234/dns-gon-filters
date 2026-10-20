@@ -1,5 +1,5 @@
 import SEED from "../data/seed.json" with { type: "json" };
-import { compile, downloadRules, isBlocked, matches, readLimited, validDomain } from "./filter.js";
+import { compile, downloadRules, isBlocked, matches, MAX_DOMAIN_RULES, readLimited, validDomain } from "./filter.js";
 import { blockedResponse, inspectAnswer, parseQuery, upstreamQuery } from "./dns.js";
 
 const UPSTREAM = "https://cloudflare-dns.com/dns-query";
@@ -26,9 +26,9 @@ async function state(env) {
       const response = await fetch(FEED, { redirect: "manual", signal: AbortSignal.timeout(4000),
         cf: { cacheTtl: 900, cacheEverything: true } });
       if (!response.ok) throw new Error("Feed unavailable");
-      const bytes = await readLimited(response.body, 5 * 1024 * 1024);
+      const bytes = await readLimited(response.body, 8 * 1024 * 1024);
       const candidate = JSON.parse(new TextDecoder().decode(bytes));
-      if (candidate.block.length > 200000 || !Array.isArray(candidate.customAllow) ||
+      if (candidate.block.length > MAX_DOMAIN_RULES || !Array.isArray(candidate.customAllow) ||
           candidate.customAllow.length > 200 || !candidate.customAllow.every(validDomain)) throw new Error("Invalid feed");
       const compiled = compile(candidate, candidate.customAllow);
       // Keep a newer in-memory data set if GitHub temporarily returns an older cached version.

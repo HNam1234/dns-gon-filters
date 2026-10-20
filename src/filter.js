@@ -4,7 +4,11 @@ export const SOURCES = [
   { name: "uBlock Quick fixes", url: "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt" },
   { name: "uBlock Unbreak", url: "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt", exceptionsOnly: true },
   { name: "EasyList", url: "https://easylist.to/easylist/easylist.txt" },
+  { name: "HaGeZi Multi NORMAL", url: "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/multi.txt" },
+  { name: "HaGeZi Pop-Up Ads", url: "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/popupads.txt" },
 ];
+
+export const MAX_DOMAIN_RULES = 300000;
 
 export const DEFAULT_ALLOW = [
   "graph.facebook.com", "graph.instagram.com", "whatsapp.com", "whatsapp.net",
@@ -103,6 +107,6 @@ export async function downloadRules(fetcher = fetch) {
     sources.push({ name: source.name, url: source.url, sha256: [...digest].map(n => n.toString(16).padStart(2, "0")).join(""),
       bytes: bytes.length, domainRules: parsed.block.length, exceptions: parsed.allow.length, skipped: parsed.skipped });
   }
-  if (block.size < 100 || block.size > 200000) throw new Error("Unexpected filter size");
+  if (block.size < 100 || block.size > MAX_DOMAIN_RULES) throw new Error("Unexpected filter size");
   return { version: 1, updated: new Date().toISOString(), block: [...block].sort(), allow: [...allow].sort(), sources };
 }

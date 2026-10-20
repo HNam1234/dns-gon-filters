@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseRules, compile, isBlocked, validDomain } from "../src/filter.js";
+import { parseRules, compile, isBlocked, MAX_DOMAIN_RULES, SOURCES, validDomain } from "../src/filter.js";
 import { parseQuery, upstreamQuery, blockedResponse, inspectAnswer, readName } from "../src/dns.js";
 import { createHandler } from "../src/index.js";
 
@@ -29,6 +29,15 @@ test("browser-context rules, regexes, scripts and conditionals never become doma
   const rules = parseRules("||ads.test^\n||needed.test^$third-party\n||media.test/path\n!#if env_firefox\n||conditional.test^\n!#else\n||other.test^\n!#endif\nexample.test##.ad\n@@||ads.test^$domain=example.test");
   assert.deepEqual(rules.block, ["ads.test"]);
   assert.deepEqual(rules.allow, ["ads.test"]);
+});
+
+test("balanced DNS and pop-up sources are part of the reviewed daily feed", () => {
+  assert.equal(MAX_DOMAIN_RULES, 300000);
+  assert.deepEqual(SOURCES.slice(-2).map(source => source.name), ["HaGeZi Multi NORMAL", "HaGeZi Pop-Up Ads"]);
+  for (const source of SOURCES.slice(-2)) {
+    assert.equal(new URL(source.url).hostname, "raw.githubusercontent.com");
+    assert.match(source.url, /^https:\/\/raw\.githubusercontent\.com\/hagezi\/dns-blocklists\/main\/adblock\//);
+  }
 });
 
 test("unbreak sources only contribute exceptions; suffix matches honor label boundaries", () => {
