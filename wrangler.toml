@@ -1,0 +1,12 @@
+name = "dns-gon-private"
+main = "dist/worker.js"
+compatibility_date = "2026-10-20"
+workers_dev = true
+send_metrics = false
+logpush = false
+
+[observability]
+enabled = false
+
+# Set DNS_TOKEN as a secret before use. Filter updates run on GitHub Actions, no KV is required.
+# No paid service, analytics, database of queries, external logging or unencrypted DNS fallback.

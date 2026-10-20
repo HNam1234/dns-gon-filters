@@ -1,0 +1,11 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+const filters = (await readFile("src/filter.js", "utf8")).replace(/^export /gm, "");
+const dns = (await readFile("src/dns.js", "utf8")).replace(/^export /gm, "");
+let entry = (await readFile("src/index.js", "utf8")).replace(/^import .*;\r?\n/gm, "");
+entry = entry.replace(/^export (async )?function /gm, "$1function ");
+const seed = JSON.parse(await readFile("data/seed.json", "utf8"));
+const output = `// DNS Gon Private. GPL-3.0-or-later. See source package for attribution and corresponding filter sources.\nconst SEED=${JSON.stringify(seed)};\n${filters}\n${dns}\n${entry}`;
+if (/\bconsole\.|eval\(|new Function/.test(filters + dns + entry)) throw new Error("Unexpected logging or dynamic code");
+await mkdir("dist", { recursive: true });
+await writeFile("dist/worker.js", output);
+console.log(JSON.stringify({ build: "ok", bytes: Buffer.byteLength(output), rules: seed.block.length }));

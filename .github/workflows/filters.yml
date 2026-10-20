@@ -1,0 +1,39 @@
+name: Update ad filters
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['src/**', 'scripts/**', 'test/**', 'custom-allowlist.json', '.github/workflows/filters.yml']
+permissions:
+  contents: write
+concurrency:
+  group: filter-updates
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Fetch and compile official filters
+        run: npm run seed
+      - name: Security regression tests
+        run: npm test
+      - name: Build and inspect
+        run: |
+          npm run build
+          node --check dist/worker.js
+      - name: Publish filter data
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/seed.json source-lists/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh official ad filter data'
+            git push
+          fi

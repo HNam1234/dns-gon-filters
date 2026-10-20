@@ -1,0 +1,12 @@
+{
+  "name": "dns-gon-private",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "build": "node scripts/build.mjs",
+    "seed": "node scripts/seed.mjs"
+  }
+}
