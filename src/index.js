@@ -4,7 +4,7 @@ import { blockedResponse, inspectAnswer, parseQuery, upstreamQuery } from "./dns
 
 const UPSTREAM = "https://cloudflare-dns.com/dns-query";
 const FILTER_KEY = "filters-v1", ALLOW_KEY = "allow-v1", UPDATE_KEY = "update-v1";
-const FEED = "https://raw.githubusercontent.com/HNam1234/dns-gon-filters/main/data/seed.json";
+const FEED = "https://raw.githubusercontent.com/HNam1234/dns-gon-filters/refs/heads/main/data/seed.json";
 let cached = null, cachedNamespace = null, cacheUntil = 0;
 let lastRefresh = null;
 const plain = (message, status = 200) => new Response(message, { status,
@@ -63,7 +63,7 @@ export function createHandler(fetcher = fetch) {
       if (!/^[a-f0-9]{32,128}$/.test(env.DNS_TOKEN || "")) return plain("Setup required", 503);
       if (url.pathname === "/health" && request.method === "GET") {
         const current = await state(env), update = env.FILTERS ? await env.FILTERS.get(UPDATE_KEY, "json") : lastRefresh;
-        return Response.json({ service: "DNS Gon Private", version: "1.0.1", filterRuleLimit: MAX_DOMAIN_RULES, status: "ready", queryLogs: false,
+        return Response.json({ service: "DNS Gon Private", version: "1.0.2", filterRuleLimit: MAX_DOMAIN_RULES, status: "ready", queryLogs: false,
           filtersUpdated: current.data.updated, filterAgeDays: Math.floor((Date.now() - Date.parse(current.data.updated)) / 86400000),
           domainRules: current.block.length, sources: current.data.sources.map(s => s.name), lastUpdate: update,
           dnsUpstream: UPSTREAM }, { headers: { "Cache-Control": "no-store" } });

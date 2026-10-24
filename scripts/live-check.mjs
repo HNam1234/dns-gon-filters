@@ -5,9 +5,13 @@ const origin = "https://dns-gon-private.myfavblueone.workers.dev";
 const url = `${origin}/${token}/dns-query`;
 const queries = [
   ["googleads.g.doubleclick.net", 1, "blocked"], ["ads.pubmatic.com", 1, "blocked"],
+  ["pagead2.googlesyndication.com", 1, "blocked"], ["securepubads.g.doubleclick.net", 1, "blocked"],
+  ["cdn.adxcontent.com", 1, "blocked"], ["bidgear-syndication.com", 1, "blocked"],
+  ["cdn2.vietadx.net", 1, "blocked"], ["shortlink.linkroyal.workers.dev", 1, "blocked"],
   ["example.com", 1, "resolved"], ["apple.com", 28, "resolved"],
   ["graph.facebook.com", 1, "resolved"], ["web.whatsapp.com", 1, "resolved"],
   ["accounts.google.com", 1, "resolved"], ["login.microsoftonline.com", 1, "resolved"],
+  ["streamvl.online", 1, "resolved"], ["qph.cf2.quoracdn.net", 1, "resolved"], ["cdn.viedn.net", 1, "resolved"],
   ["cloudflare.com", 65, "answered"],
 ];
 function makeQuery(name, type) {
@@ -43,6 +47,7 @@ const healthResponse = await fetch(origin + "/health");
 const healthText = await healthResponse.text();
 const health = JSON.parse(healthText);
 results.push({ check: "health hides DNS key", pass: !healthText.includes(token) && health.queryLogs === false });
+results.push({ check: "production accepts larger feeds and includes Vietnamese filters", pass: health.version === "1.0.2" && health.filterRuleLimit === 300000 && health.domainRules > 200000 && health.sources.includes("ABPVN") });
 const report = { time: new Date().toISOString(), origin, scope: "synthetic DNS queries from the Windows PC, not full iPhone app testing", health, results, allPassed: results.every(result => result.pass) };
 await writeFile("secrets/live-check.json", JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report));
