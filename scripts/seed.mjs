@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { downloadRules, SOURCES } from "../src/filter.js";
 import { applyCustomRules } from "./custom-rules.mjs";
+import { makeShadowrocketList } from "./shadowrocket.mjs";
 const originals = new Map();
 let data = await downloadRules(async (url, options) => {
   const response = await fetch(url, options);
@@ -16,4 +17,5 @@ await mkdir("source-lists", { recursive: true });
 for (let index = 0; index < SOURCES.length; index++) {
   await writeFile(`source-lists/${index + 1}.txt`, await originals.get(SOURCES[index].url));
 }
+await makeShadowrocketList();
 console.log(JSON.stringify({ updated: data.updated, rules: data.block.length, exceptions: data.allow.length, sources: data.sources }));

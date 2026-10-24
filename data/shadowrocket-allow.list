@@ -1,0 +1,13 @@
+# Apply DIRECT before the advertising REJECT rule set.
+DOMAIN-SUFFIX,accounts.google.com
+DOMAIN-SUFFIX,apple.com
+DOMAIN-SUFFIX,coral.coralproject.net
+DOMAIN-SUFFIX,graph.facebook.com
+DOMAIN-SUFFIX,graph.instagram.com
+DOMAIN-SUFFIX,icloud.com
+DOMAIN-SUFFIX,login.live.com
+DOMAIN-SUFFIX,login.microsoftonline.com
+DOMAIN-SUFFIX,oauth2.googleapis.com
+DOMAIN-SUFFIX,streamvl.online
+DOMAIN-SUFFIX,whatsapp.com
+DOMAIN-SUFFIX,whatsapp.net

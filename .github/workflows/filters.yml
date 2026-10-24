@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/seed.json source-lists/
+          git add data/seed.json data/shadowrocket-ads.list data/shadowrocket-allow.list source-lists/
           if ! git diff --cached --quiet; then
             git commit -m 'Refresh official ad filter data'
             git push
