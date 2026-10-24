@@ -1,9 +1,9 @@
 [Adblock Plus 2.0]
-! Version: 202610241052
+! Version: 202610241117
 ! Title: EasyList
-! Last modified: 24 Oct 2026 10:52 UTC
+! Last modified: 24 Oct 2026 11:17 UTC
 ! Expires: 4 days (update frequency)
-! Commit: 15e4581570f221a4f2051a416f8a667b3fd5c3fb
+! Commit: ce57aec7e73573dc3d66c1defb4c96c3b3b5fd1c
 ! *** easylist:template_header.txt ***
 ! 
 ! Please report any unblocked adverts or problems
@@ -20408,6 +20408,7 @@ browsershots.org#@#.advert_area
 ||bd92cdf877.com^
 ||bdagxixncozzw.site^
 ||bdaskfinkhtfp.online^
+||bdavjbhjpzjmt.space^
 ||bdbfdzwawthkw.online^
 ||bdbtqmzbhwtpy.site^
 ||bddeampqxylbg.space^
@@ -33225,6 +33226,7 @@ browsershots.org#@#.advert_area
 ||gysqsokhnysqp.space^
 ||gytebaubeewoons.qpon^
 ||gytgfxxibsezg.space^
+||gytzzylfaokwt.online^
 ||gyunqnwvqvooi.online^
 ||gyuwijtgtrayg.space^
 ||gyvedtryms.com^
@@ -39847,6 +39849,7 @@ browsershots.org#@#.advert_area
 ||linenvirginityclient.com^
 ||lineodtpdajrz.store^
 ||lineupproller.shop^
+||lineyalary.cyou^
 ||lingercatchpyramid.com^
 ||lingetawols.cyou^
 ||linguetlainer.cfd^
@@ -41553,6 +41556,7 @@ browsershots.org#@#.advert_area
 ||mfgnbdjfavsgf.website^
 ||mfgoxtdrxupes.website^
 ||mfgvhabnnlwkd.online^
+||mfgygyhpddlyo.online^
 ||mfifgbwxafrbq.site^
 ||mfiomoaa.com^
 ||mfiyumsqrojut.site^
@@ -42568,6 +42572,7 @@ browsershots.org#@#.advert_area
 ||mujwqivmsqpzf.site^
 ||mukrirumpy.cyou^
 ||muktizlotych.qpon^
+||mulchdenyhows.cyou^
 ||mulchimbiber.com^
 ||mulesto.com^
 ||muleterritorywitchcraft.com^
@@ -59792,6 +59797,7 @@ browsershots.org#@#.advert_area
 ||vlbaofouiipjg.site^
 ||vldlklwhhcdyf.site^
 ||vldukhscbnhsl.site^
+||vleqrwluxgslv.online^
 ||vlflbbqnagpac.store^
 ||vlgtgjpcgoiqa.online^
 ||vlhpssfra.com^
@@ -60079,6 +60085,7 @@ browsershots.org#@#.advert_area
 ||vsksdftatdnwg.site^
 ||vslkklvzrqftq.online^
 ||vslnphbyuqbkz.site^
+||vsnctrfamkmai.online^
 ||vsofglbfeiewy.site^
 ||vsorcyifkcbwo.site^
 ||vsqczzvkhzphx.site^

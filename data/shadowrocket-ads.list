@@ -1,7 +1,7 @@
 # DNS Gon - domain rules for Shadowrocket; GPL-3.0-or-later
 # Derived from the attributed inputs in source-lists/. See COPYING-uAssets.txt.
-# Updated: 2026-10-24T11:01:41.132Z
-# Domain rules: 51686
+# Updated: 2026-10-24T11:30:04.261Z
+# Domain rules: 51693
 DOMAIN-SUFFIX,000491b06a.com
 DOMAIN-SUFFIX,0017c6c37c.com
 DOMAIN-SUFFIX,0019x.com
@@ -5242,6 +5242,7 @@ DOMAIN-SUFFIX,bd8cfb84ab.com
 DOMAIN-SUFFIX,bd92cdf877.com
 DOMAIN-SUFFIX,bdagxixncozzw.site
 DOMAIN-SUFFIX,bdaskfinkhtfp.online
+DOMAIN-SUFFIX,bdavjbhjpzjmt.space
 DOMAIN-SUFFIX,bdbfdzwawthkw.online
 DOMAIN-SUFFIX,bdbtqmzbhwtpy.site
 DOMAIN-SUFFIX,bddeampqxylbg.space
@@ -19428,6 +19429,7 @@ DOMAIN-SUFFIX,gys5.com
 DOMAIN-SUFFIX,gysqsokhnysqp.space
 DOMAIN-SUFFIX,gytebaubeewoons.qpon
 DOMAIN-SUFFIX,gytgfxxibsezg.space
+DOMAIN-SUFFIX,gytzzylfaokwt.online
 DOMAIN-SUFFIX,gyunqnwvqvooi.online
 DOMAIN-SUFFIX,gyuwijtgtrayg.space
 DOMAIN-SUFFIX,gyvedtryms.com
@@ -26101,6 +26103,7 @@ DOMAIN-SUFFIX,linenetibicen.cyou
 DOMAIN-SUFFIX,linenvirginityclient.com
 DOMAIN-SUFFIX,lineodtpdajrz.store
 DOMAIN-SUFFIX,lineupproller.shop
+DOMAIN-SUFFIX,lineyalary.cyou
 DOMAIN-SUFFIX,lingercatchpyramid.com
 DOMAIN-SUFFIX,lingetawols.cyou
 DOMAIN-SUFFIX,linguetlainer.cfd
@@ -27837,6 +27840,7 @@ DOMAIN-SUFFIX,mffvrbibyvnne.site
 DOMAIN-SUFFIX,mfgnbdjfavsgf.website
 DOMAIN-SUFFIX,mfgoxtdrxupes.website
 DOMAIN-SUFFIX,mfgvhabnnlwkd.online
+DOMAIN-SUFFIX,mfgygyhpddlyo.online
 DOMAIN-SUFFIX,mfifgbwxafrbq.site
 DOMAIN-SUFFIX,mfiomoaa.com
 DOMAIN-SUFFIX,mfiyumsqrojut.site
@@ -28858,6 +28862,7 @@ DOMAIN-SUFFIX,mujteeuqrdvux.site
 DOMAIN-SUFFIX,mujwqivmsqpzf.site
 DOMAIN-SUFFIX,mukrirumpy.cyou
 DOMAIN-SUFFIX,muktizlotych.qpon
+DOMAIN-SUFFIX,mulchdenyhows.cyou
 DOMAIN-SUFFIX,mulchimbiber.com
 DOMAIN-SUFFIX,mulesto.com
 DOMAIN-SUFFIX,muleterritorywitchcraft.com
@@ -46303,6 +46308,7 @@ DOMAIN-SUFFIX,vlauqfbnfigdk.site
 DOMAIN-SUFFIX,vlbaofouiipjg.site
 DOMAIN-SUFFIX,vldlklwhhcdyf.site
 DOMAIN-SUFFIX,vldukhscbnhsl.site
+DOMAIN-SUFFIX,vleqrwluxgslv.online
 DOMAIN-SUFFIX,vlflbbqnagpac.store
 DOMAIN-SUFFIX,vlgtgjpcgoiqa.online
 DOMAIN-SUFFIX,vlhpssfra.com
@@ -46590,6 +46596,7 @@ DOMAIN-SUFFIX,vskfhfqsvurqy.online
 DOMAIN-SUFFIX,vsksdftatdnwg.site
 DOMAIN-SUFFIX,vslkklvzrqftq.online
 DOMAIN-SUFFIX,vslnphbyuqbkz.site
+DOMAIN-SUFFIX,vsnctrfamkmai.online
 DOMAIN-SUFFIX,vsofglbfeiewy.site
 DOMAIN-SUFFIX,vsorcyifkcbwo.site
 DOMAIN-SUFFIX,vsqczzvkhzphx.site
