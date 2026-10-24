@@ -1,0 +1,19 @@
+#!name=DNSGon-YouTubeApp-Community
+#!desc=Experimental native YouTube API filter; community scripts updated 2026-10-07 and pinned. Shadowrocket playback needs device testing.
+#!author=DNSGon adapter; scripts by teaoea/shell (MIT)
+#!homepage=https://github.com/teaoea/shell/tree/3fbf89da6615d2dfdd34fd0f3ffbd2edd3aa80c1/plugins/YouTube
+# API-only port of YouTubeNoAds.sgmodule; no Loon-only initplayback/reject_video workaround.
+# Keep DNSGon-AdsOnly for Chrome; there are no overlapping Web response scripts.
+# Logging, raw capture, translation, background playback and channel lists are disabled.
+
+[Rule]
+AND,((PROTOCOL,UDP),(DEST-PORT,443),(DOMAIN,youtubei.googleapis.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DEST-PORT,443),(DOMAIN,youtubei-att.googleapis.com)),REJECT-NO-DROP
+
+[Script]
+DNSGon.YTApp.Request = type=http-request,pattern=^https:\/\/youtubei(?:-att)?\.googleapis\.com\/youtubei\/v1\/(?:player|get_watch|player\/ad_break|log_event)(?:\?[^#]*)?$,requires-body=true,binary-body-mode=1,max-size=2097152,timeout=10,script-path=https://raw.githubusercontent.com/teaoea/shell/3fbf89da6615d2dfdd34fd0f3ffbd2edd3aa80c1/plugins/YouTube/dist/request.min.js,argument="background_playback=false&hide_home_shorts=false&translation_enabled=false&playback_region=original&log_enabled=false&capture_raw=false",enable=true
+DNSGon.YTApp.Response = type=http-response,pattern=^https:\/\/youtubei(?:-att)?\.googleapis\.com\/youtubei\/v1\/(?:browse|next|search|player|get_watch|config|log_event|reel\/reel_watch_sequence)(?:\?[^#]*)?$,requires-body=true,binary-body-mode=1,max-size=2097152,timeout=10,script-path=https://raw.githubusercontent.com/teaoea/shell/3fbf89da6615d2dfdd34fd0f3ffbd2edd3aa80c1/plugins/YouTube/dist/response.min.js,argument="background_playback=false&hide_home_shorts=false&translation_enabled=false&playback_region=original&log_enabled=false&capture_raw=false",enable=true
+
+[MITM]
+h2 = true
+hostname = %APPEND% youtubei.googleapis.com, youtubei-att.googleapis.com

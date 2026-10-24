@@ -26,5 +26,32 @@ novel scripts and unknown layouts can remain. This is not full uBlock Origin.
 Runtime ad removal, normal navigation/video and background stability still need
 verification on the owner's iPhone; successful import is not runtime proof.
 
+Owner feedback on 2026-10-24: module imported/enabled, VPN connected, but many
+ads remain. HTTPS rewriting has not yet been observed on the device. Version
+0.2 removes whitespace inside an unquoted HeoVL replacement which could split
+the rewrite into extra fields. This is a parser fix, not proof of the cause.
+Open `https://heovl.im/robots.txt?dnsgon-check=1` after updating: the first text
+should start `DNSGON_REWRITE_OK-` if this module's HTTPS body rewrite runs.
+
+## Native YouTube community trial
+
+`DNSGon-YouTubeApp-Community.sgmodule` is a separate API-only adapter using
+[teaoea/shell](https://github.com/teaoea/shell/tree/3fbf89da6615d2dfdd34fd0f3ffbd2edd3aa80c1/plugins/YouTube)
+scripts last changed 2026-10-07 (MIT). The two URLs are pinned to that reviewed
+commit. Attribution and license remain in the upstream source.
+
+It handles known JSON/Protobuf ads on `youtubei.googleapis.com` and
+`youtubei-att.googleapis.com`, with binary mode and a 2 MiB body limit. It does
+not overlap the existing YouTube Web response script. No new CA or proxy is
+included. Logging, capture, subtitles, background playback and channel lists
+are disabled. The upstream config handler may keep protocol keys in local
+Shadowrocket storage; the selected routes do not intentionally upload them.
+
+This is not the complete Loon plugin. Its Loon-specific initplayback empty-video
+workaround is not ported, and there is no media-host decryption. Ads using that
+path or another host may remain. Shadowrocket compatibility and playback need
+real-device verification. Disable this separate module if YouTube playback or
+sign-in fails. A synthetic JSON/Protobuf check is not a security certification.
+
 On breakage disable this module first; the private DNS configuration and CA
 remain separate. Test normal sign-in, navigation and media after enabling it.
