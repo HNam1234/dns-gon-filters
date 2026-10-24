@@ -1,0 +1,25 @@
+#!name=DNSGon-AdsOnly
+#!desc=Maintained ad hosts + bounded YouTube Web ad metadata + inspected HeoVL banner fix. No subscription changes or shared CA.
+#!author=DNSGon
+
+[Rule]
+RULE-SET,https://raw.githubusercontent.com/HNam1234/dns-gon-filters/main/data/shadowrocket-allow.list,DIRECT
+RULE-SET,https://raw.githubusercontent.com/HNam1234/dns-gon-filters/main/data/shadowrocket-ads.list,REJECT
+DOMAIN,ads.adspro.name,REJECT
+AND,((PROTOCOL,UDP),(DEST-PORT,443),(DOMAIN,heovl.im)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DEST-PORT,443),(DOMAIN,www.heovl.im)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DEST-PORT,443),(DOMAIN,m.youtube.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DEST-PORT,443),(DOMAIN,www.youtube.com)),REJECT-NO-DROP
+
+[URL Rewrite]
+^https?://ads\.adspro\.name/ - reject
+
+[Body Rewrite]
+http-response ^https://(?:www\.)?heovl\.im/(?![^?#]*\.(?:js|css|json|gif|png|jpg|jpeg|webp|svg|ico|mp4|m3u8|ts)(?:\?|$))[^?#]*(?:\?[^#]*)?$ (<[hH][eE][aA][dD](?:\s[^>]*)?>) $1<style>.ad-place,[class^="ads--"],[class*=" ads--"]{display:none!important;visibility:hidden!important;pointer-events:none!important}</style><script>(function(){const/**/h="ads.adspro.name",o=window.open;window.open=function(u){try{if(typeof/**/u==="string"&&new/**/URL(u,location.href).hostname===h)return/**/null}catch(e){}return/**/Reflect.apply(o,window,arguments)}})();</script>
+
+[Script]
+DNSGon.YouTubeWeb = type=http-response, script-path=https://raw.githubusercontent.com/HNam1234/dns-gon-filters/53bf2632a91da199dfe7103aac83e1a0fa87ac9e/shadowrocket/youtube-web-ads.js, pattern=^https:\/\/(?:m|www)\.youtube\.com\/(?:youtubei\/v1\/(?:player|browse|next|search)(?:[/?]|$)|(?:watch|results)(?:\?|$)|feed\/|(?:\?|$)), requires-body=true, timeout=8, max-size=2097152, enable=true
+
+[MITM]
+h2 = true
+hostname = %APPEND% heovl.im, www.heovl.im, m.youtube.com, www.youtube.com
