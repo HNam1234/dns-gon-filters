@@ -40,8 +40,9 @@ should start `DNSGON_REWRITE_OK-` if this module's HTTPS body rewrite runs.
 scripts last changed 2026-10-07 (MIT). The two URLs are pinned to that reviewed
 commit. Attribution and license remain in the upstream source.
 
-It handles known JSON/Protobuf ads on `youtubei.googleapis.com` and
-`youtubei-att.googleapis.com`, with binary mode and a 2 MiB body limit. It does
+It handles known JSON/Protobuf ads on `youtubei.googleapis.com`,
+`youtubei-att.googleapis.com`, `youtube.com`, `www.youtube.com`, `m.youtube.com`
+and `music.youtube.com`, with binary mode, WebView execution and a 2 MiB body limit. It does
 not overlap the existing YouTube Web response script. No new CA or proxy is
 included. Logging, capture, subtitles, background playback and channel lists
 are disabled. The upstream config handler may keep protocol keys in local
@@ -52,6 +53,10 @@ workaround is not ported, and there is no media-host decryption. Ads using that
 path or another host may remain. Shadowrocket compatibility and playback need
 real-device verification. Disable this separate module if YouTube playback or
 sign-in fails. A synthetic JSON/Protobuf check is not a security certification.
+
+The module leaves `background_playback=false` and does not change entitlement,
+receipt or subscription responses. It cannot grant YouTube Premium background
+playback; use the account's official YouTube setting/subscription for that.
 
 On breakage disable this module first; the private DNS configuration and CA
 remain separate. Test normal sign-in, navigation and media after enabling it.

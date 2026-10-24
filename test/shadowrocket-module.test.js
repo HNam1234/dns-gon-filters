@@ -19,11 +19,12 @@ test('native YouTube community adapter scopes scripts and interception to native
  assert.equal(scriptLines.length,2);
  for(const line of scriptLines) {
   const pattern=new RegExp(/pattern=([^,]+)/.exec(line)[1]);
-  for(const host of ['youtubei.googleapis.com','youtubei-att.googleapis.com']) assert.ok(pattern.test(`https://${host}/youtubei/v1/player`));
+  for(const host of ['youtubei.googleapis.com','youtubei-att.googleapis.com','youtube.com','www.youtube.com','m.youtube.com','music.youtube.com']) assert.ok(pattern.test(`https://${host}/youtubei/v1/player`));
   for(const url of ['https://www.youtube.com/youtubei/v1/player','https://youtubei.googleapis.com.example.test/youtubei/v1/player','https://accounts.google.com/','https://rr1.googlevideo.com/initplayback?x=1']) assert.equal(pattern.test(url),false);
   assert.ok(line.includes('/3fbf89da6615d2dfdd34fd0f3ffbd2edd3aa80c1/'));
   assert.ok(line.includes('log_enabled=false&capture_raw=false'));
+  assert.ok(line.includes('requires-body=1,binary-body-mode=1,engine=webview'));
  }
- assert.ok(module.includes('hostname = %APPEND% youtubei.googleapis.com, youtubei-att.googleapis.com'));
+  assert.ok(module.includes('hostname = %APPEND% youtubei.googleapis.com, youtubei-att.googleapis.com, youtube.com, www.youtube.com, m.youtube.com, music.youtube.com'));
  assert.equal(/ca-p12|ca-passphrase|\[Proxy\]|hostname\s*=\s*\*|skip-server-cert-verify/.test(module),false);
 });
