@@ -1,44 +1,85 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { aesCtr, signHmac } from '../src/crypto.js';
-import { filterUmpResponse } from '../src/ump.js';
-import { concat, encodeFields, encodeLengthDelimited, encodeVarint } from '../src/protobuf.js';
+import { gzipSync, gunzipSync } from 'node:zlib';
+import { CompositeBuffer, UmpReader, UmpWriter } from 'googlevideo/ump';
+import { OnesieHeader, OnesieInnertubeResponse, OnesieProxyStatus } from 'googlevideo/protos';
+import { aesCtr, signHmac, verifyHmac } from '../src/crypto.js';
+import { filterUmpResponse, parseUmp, encodeUmp, encodeUmpInt, readUmpInt } from '../src/ump.js';
+import { concat, encodeLengthDelimited, parseFields } from '../src/protobuf.js';
 
+// Independent oracle: the upstream codecs encode/decode the test envelope and UMP.
 const key = Uint8Array.from({ length: 32 }, (_, i) => i + 1);
 const iv = Uint8Array.from({ length: 16 }, (_, i) => 100 + i);
-function field(no, bytes) { return encodeLengthDelimited(no, bytes); }
-function playerWithAds() { return concat(field(7, Uint8Array.from([1, 2])), field(9, field(1, Uint8Array.from([3]))), field(68, Uint8Array.from([4, 5])), field(2, Uint8Array.from([9]))); }
-function umpPart(type, data) { return concat(encodeVarint(type), encodeVarint(data.length), data); }
+const field = encodeLengthDelimited;
+const playback = field(9, field(1, new Uint8Array(300).fill(42)));
+const player = concat(field(7, Uint8Array.of(1)), playback, field(68, Uint8Array.of(4)), field(2, Uint8Array.of(9)));
 
-test('decrypts, removes player ad fields, re-encrypts and preserves unknown playback fields', async () => {
-  const player = playerWithAds();
-  const content = field(2, player);
-  const onesie = field(4, content);
-  const encrypted = await aesCtr(key.slice(0, 16), iv, onesie, 'encrypt');
-  const hmac = await signHmac(key, encrypted, iv);
-  const encryptedPart = concat(field(1, encrypted), field(2, hmac), field(3, iv));
-  const header = concat(encodeVarint(8), encodeVarint(0)); // field 1, enum 0
-  const ump = concat(umpPart(10, header), umpPart(11, encryptedPart));
-  const result = await filterUmpResponse(ump, key);
-  assert.equal(result.changed, true);
-  assert.notDeepEqual(Array.from(result.bytes), Array.from(ump));
-  const outParts = [];
-  let pos = 0;
-  while (pos < result.bytes.length) { const t = read(result.bytes, pos); pos = t.next; const n = read(result.bytes, pos); pos = n.next; outParts.push(result.bytes.slice(pos, pos + Number(n.value))); pos += Number(n.value); }
-  const outFields = parse(outParts[1]); const outEncrypted = outFields.find(f => f.no === 1).payload; const outIv = outFields.find(f => f.no === 3).payload;
-  const plain = await aesCtr(key.slice(0, 16), outIv, outEncrypted, 'decrypt');
-  const outer = parse(plain), contentOut = parse(outer.find(f => f.no === 4).payload), playerOut = parse(contentOut.find(f => f.no === 2).payload);
-  assert.equal(playerOut.some(f => f.no === 7 || f.no === 68), false);
-  assert.equal(playerOut.some(f => f.no === 2), true);
+function referenceUmp(parts) {
+  const buffer = new CompositeBuffer(), writer = new UmpWriter(buffer);
+  for (const p of parts) writer.write(p.type, p.data);
+  return concat(...buffer.chunks);
+}
+
+async function fixture({ gzip = false, json = false, tamper = false, status = 200, encrypted = true, type = 0 } = {}) {
+  const body = json ? new TextEncoder().encode(JSON.stringify({ adPlacements: [{}], adSlots: [{}], videoDetails: { title: 'fixture' } })) : player;
+  let plain = OnesieInnertubeResponse.encode({ onesieProxyStatus: OnesieProxyStatus.OK, httpStatus: status, headers: [], body }).finish();
+  if (gzip) plain = gzipSync(plain);
+  const ciphertext = encrypted ? await aesCtr(key.slice(0, 16), iv, plain, 'encrypt') : plain;
+  const mac = encrypted ? await signHmac(key, ciphertext, iv) : undefined;
+  if (tamper) mac[0] ^= 1;
+  const header = OnesieHeader.encode({ type, restrictedFormats: [], cryptoParams: { iv: encrypted ? iv : undefined, hmac: mac, compressionType: gzip ? 1 : 0 } }).finish();
+  const media = { type: 20, data: Uint8Array.of(0xde, 0xad, 0xbe, 0xef) };
+  return { input: referenceUmp([{ type: 10, data: header }, { type: 11, data: ciphertext }, media]), media };
+}
+
+for (const value of [0, 127, 128, 150, 16383, 16384, 20000, 2097151, 2097152, 10000000, 268435456, 300000000, 4294967295]) {
+  test(`UMP integer agrees with upstream codec for ${value}`, async () => {
+    const actual = encodeUmp([{ type: value, data: Uint8Array.of(42) }]);
+    assert.deepEqual(actual, referenceUmp([{ type: value, data: Uint8Array.of(42) }]));
+    const encoded = encodeUmpInt(value);
+    assert.equal(readUmpInt(encoded, 0).value, value);
+    assert.equal(parseUmp(actual)[0].type, value);
+  });
+}
+
+for (const options of [{}, { gzip: true }, { json: true }, { encrypted: false }]) {
+  test(`filters a real-schema Onesie envelope ${JSON.stringify(options)}`, async () => {
+    const { input, media } = await fixture(options);
+    const result = await filterUmpResponse(input, key);
+    assert.equal(result.changed, true, result.reason);
+    const parts = [];
+    await new UmpReader({ onPart(type, data) { parts.push({ type, data: concat(...data.chunks) }); } }).feed(result.bytes);
+    const header = OnesieHeader.decode(parts[0].data), params = header.cryptoParams;
+    assert.deepEqual(parts[2], media);
+    let plain = parts[1].data;
+    if (options.encrypted !== false) {
+      assert.equal(await verifyHmac(key, plain, params.iv, params.hmac), true);
+      plain = await aesCtr(key.slice(0, 16), params.iv, plain, 'decrypt');
+    }
+    if (options.gzip) plain = gunzipSync(plain);
+    const envelope = OnesieInnertubeResponse.decode(plain);
+    assert.equal(envelope.httpStatus, 200);
+    if (options.json) {
+      const body = JSON.parse(new TextDecoder().decode(envelope.body));
+      assert.equal(body.adPlacements, undefined); assert.equal(body.adSlots, undefined);
+      assert.deepEqual(body.videoDetails, { title: 'fixture' });
+    } else {
+      const fields = parseFields(envelope.body);
+      assert.equal(fields.some(f => f.no === 7 || f.no === 68), false);
+      assert.deepEqual(new Uint8Array(fields.find(f => f.no === 9).raw), playback);
+      assert.equal(fields.some(f => f.no === 2), true);
+    }
+  });
+}
+
+for (const options of [{ tamper: true }, { status: 403 }, { type: 1 }]) {
+  test(`passes through without mutation ${JSON.stringify(options)}`, async () => {
+    const { input } = await fixture(options), result = await filterUmpResponse(input, key);
+    assert.equal(result.changed, false); assert.deepEqual(result.bytes, input);
+  });
+}
+
+test('malformed UMP and oversized responses pass through', async () => {
+  assert.equal((await filterUmpResponse(Uint8Array.of(0xff), key)).reason, 'filter-fallback');
+  assert.equal((await filterUmpResponse(new Uint8Array(100), key, 10)).reason, 'body-limit');
 });
-
-test('malformed or oversized responses fall back without throwing', async () => {
-  const malformed = await filterUmpResponse(Uint8Array.from([0xff, 0xff]), key);
-  assert.equal(malformed.changed, false);
-  assert.equal(malformed.reason, 'filter-fallback');
-  const oversized = await filterUmpResponse(new Uint8Array(100), key, 10);
-  assert.equal(oversized.reason, 'body-limit');
-});
-
-function read(bytes, pos) { let value = 0n, shift = 0n; for (;;) { const b = bytes[pos++]; value |= BigInt(b & 127) << shift; if (!(b & 128)) return { value, next: pos }; shift += 7n; } }
-function parse(bytes) { const out = []; let pos = 0; while (pos < bytes.length) { const tag = read(bytes, pos); pos = tag.next; const no = Number(tag.value >> 3n), wire = Number(tag.value & 7n); assert.equal(wire, 2); const len = read(bytes, pos); pos = len.next; const n = Number(len.value); out.push({ no, payload: bytes.slice(pos, pos + n) }); pos += n; } return out; }

@@ -10,7 +10,7 @@ export default {
     const token = url.pathname.split('/').filter(Boolean)[0] || '';
     if (!env.AUTH_TOKEN || token !== env.AUTH_TOKEN) return unauthorized();
     if (request.method === 'GET' && url.pathname === `/${token}/health`) {
-      return new Response(JSON.stringify({ ok: true, service: 'dnsgon-youtube-ump' }), {
+      return new Response(JSON.stringify({ ok: true, service: 'dnsgon-youtube-ump', version: '0.3.0' }), {
         headers: { 'content-type': 'application/json', 'cache-control': 'no-store' }
       });
     }

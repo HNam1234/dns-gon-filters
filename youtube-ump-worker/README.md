@@ -1,54 +1,83 @@
-# DNSGon private YouTube UMP Worker
+# DNSGon private YouTube UMP Worker v0.3
 
-This is an independent Cloudflare Worker prototype for the encrypted
-`googlevideo.com/initplayback` path used by recent YouTube clients. It was
-written from the public UMP/Onesie protocol descriptions and the public
-request flow; it does not copy the Maasea Worker implementation.
+Independent Cloudflare Worker prototype for `googlevideo.com/initplayback`.
+It follows public UMP/Onesie protocol descriptions; it does not copy or call
+the Maasea Worker implementation.
 
-The Worker:
+## Processing and privacy
 
-1. accepts only a token-prefixed POST route;
-2. validates the `target` URL as HTTPS `*.googlevideo.com/initplayback`;
-3. forwards the original binary request with identity encoding;
-4. parses UMP parts 10/11;
-5. verifies the response HMAC and decrypts the Onesie player response with the
-   supplied 32-byte client key (AES-CTR key half + HMAC key half);
-6. removes only Player protobuf fields 7 (`adPlacements`) and 68 (`adSlots`);
-7. re-encrypts the edited response with the same IV and a new HMAC; and
-8. passes unsupported, malformed or oversized responses through unchanged.
+- Token-protected route; only HTTPS Google video `/initplayback` destinations.
+- Forwards the binary POST; strips Cookie/Authorization/Proxy-Authorization.
+- Follows at most three 307/308 redirects, each independently allowlisted to
+  HTTPS Google video `/initplayback`; other redirect destinations are rejected.
+- UMP uses prefix-length integers, separate from protobuf varints.
+- Part 10 contains the Onesie header and crypto parameters; part 11 contains
+  raw encrypted response bytes. HMAC is verified before AES-CTR decryption.
+- `OnesieInnertubeResponse.body` (field 4) contains Player directly. The filter
+  removes protobuf fields 7/68, or known top-level JSON Player ad fields.
+- Supports clear and AES-CTR responses, uncompressed/gzip payloads. Rewrites
+  header HMAC after editing and preserves unrelated media parts byte for byte.
+- Unsupported or invalid payloads pass through. The filter limit is 8 MiB;
+  upstream responses are currently buffered before applying that limit.
+- No analytics or durable server storage. Worker Logs/Traces are disabled.
+  Only the validated Google endpoint is fetched. Cloudflare remains the host
+  and can observe traffic under its own infrastructure policies.
+- The iPhone bridge stores one overwritten local status (reason/version/time)
+  without keys, URLs, video IDs, headers or raw payloads. Requests may contain
+  sensitive metadata inside their encrypted envelope; this is not a promise
+  that no account-related information can reach the Worker's memory.
 
-The Worker has no analytics, durable storage, external fetches, or fallback
-proxy destinations. Cloudflare still handles the request while the Worker is
-running, so this is private to the user's account at the application layer,
-not a claim that Cloudflare cannot observe traffic.
+## Correction to the initial prototype
 
-## Current boundary
+Version 0.3 fixes four errors: the bridge read Maasea's cache name instead of
+teaoea's `ytads.onesie.youtube.v1`; its protobuf decoder used the wrong
+multiplier; the Worker confused UMP integers with protobuf varints; and it
+expected crypto parameters and Player bytes at incorrect schema paths.
+The initial private module also contained a literal `$token` instead of the
+secret value. `render-private-module.mjs` now validates and renders the actual
+endpoint into the ignored local module, rejecting unresolved variables.
 
-This is a protocol-tested prototype, not an iPhone runtime certification. It
-does not yet handle every Onesie response type, gzip/brotli variants on every
-Cloudflare runtime, SABR follow-up requests, or all YouTube ad renderers. A
-failed filter is deliberately passed through to preserve playback.
+The earlier 5 tests shared that incorrect fixture layout. They were not
+adequate evidence of protocol compatibility or on-device ad removal.
 
-The module that redirects Shadowrocket `initplayback` requests to this Worker
-must be generated only after deployment, with the Worker URL and route token
-kept in the local configuration. Do not put a reusable production token in a
-public GitHub module.
+Current result on 2026-10-24: 35 tests pass. An anonymous live probe from the
+PC received a real UMP response, verified HMAC, decrypted the Player and decoded
+an inner HTTP 200. The same public probe through Cloudflare returned an empty
+HTTP 307 without a Location, which remains unresolved. No real iPhone ad-removal
+success is established. Health 200 only proves that the Worker is running.
 
-## Local checks
+## Verification
 
-```text
+```
+npm ci
 npm test
-node --check src/index.js
-node --check src/core.js
+npm run build
 ```
 
-The tests cover AES-CTR/HMAC verification, UMP wrapping, Player field removal,
-malformed/oversized fallback, target allowlisting and no-open-proxy behavior.
+The tests use `googlevideo@5.0.1`'s independently maintained UMP codecs and
+generated Onesie schemas as an oracle. They cover long lengths, encrypted,
+gzip, JSON and clear Player payloads, HMAC verification after editing, media
+preservation, and bridge cache/expiry/mismatch behavior.
 
-## Deployment shape
+With the v0.3 module enabled, open
+`https://www.youtube.com/robots.txt?dnsgon-check=1` in Chrome on the iPhone.
+It reports interception, cache presence and last initplayback status. Normal
+robots.txt means this script's interception has not been proven. No keys or
+route token are displayed by the diagnostic response.
 
-Copy `wrangler.toml.example` to `wrangler.toml`, set a Worker name, and create
-the secret with `wrangler secret put AUTH_TOKEN`. Deploy only after reviewing
-the code and deciding how the private module will carry the route token. The
-source does not contain a Cloudflare account ID, API token, DNS token or user
-credentials.
+`live-probe.mjs` performs a separate anonymous public YouTube protocol check
+using a fresh TV config and the owner's existing local route token. It never
+reads browser cookies, account credentials or viewing history. Success only
+proves that one public probe path, not iPhone interception or ad removal.
+
+## Deployment
+
+Set the Worker name in `wrangler.toml`, set `AUTH_TOKEN` via Wrangler secret,
+then build and deploy. Keep route tokens only in the ignored `secrets/`
+directory and private iPhone modules; never publish them to GitHub. Public
+source, bundles and tests have no account/API credentials or production token.
+
+This remains a prototype, not a security certification. It does not implement
+all Onesie response types, Brotli, SABR follow-ups, every YouTube ad renderer,
+browser cosmetic filtering or Premium/background-playback entitlements.
+On-device interception and playback must still be verified.

@@ -2,5 +2,13 @@
   "name": "dnsgon-youtube-ump-worker",
   "private": true,
   "type": "module",
-  "scripts": {"test": "node --test test/*.test.mjs"}
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "build": "esbuild src/index.js --bundle --format=esm --platform=neutral --target=es2022 --minify --outfile=worker-bundle.min.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "googlevideo": "5.0.1",
+    "youtubei.js": "18.3.0"
+  }
 }
