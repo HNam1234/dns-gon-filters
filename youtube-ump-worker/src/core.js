@@ -16,7 +16,7 @@ export async function processInitplayback({ target, clientKey, body, fetchImpl =
   if (key.length !== 32) return { status: 400, body: 'invalid-client-key-length' };
   const headers = new Headers();
   for (const [name, value] of Object.entries(body.headers || {})) {
-    if (!/^(host|content-length|connection|transfer-encoding|accept-encoding)$/i.test(name)) headers.set(name, value);
+    if (!/^(host|content-length|connection|transfer-encoding|accept-encoding|cookie|authorization|proxy-authorization)$/i.test(name)) headers.set(name, value);
   }
   headers.set('accept-encoding', 'identity');
   let upstream;
