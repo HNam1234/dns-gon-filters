@@ -63,7 +63,7 @@ export function createHandler(fetcher = fetch) {
       if (!/^[a-f0-9]{32,128}$/.test(env.DNS_TOKEN || "")) return plain("Setup required", 503);
       if (url.pathname === "/health" && request.method === "GET") {
         const current = await state(env), update = env.FILTERS ? await env.FILTERS.get(UPDATE_KEY, "json") : lastRefresh;
-        return Response.json({ service: "DNS Gon Private", version: "1.0.0", status: "ready", queryLogs: false,
+        return Response.json({ service: "DNS Gon Private", version: "1.0.1", filterRuleLimit: MAX_DOMAIN_RULES, status: "ready", queryLogs: false,
           filtersUpdated: current.data.updated, filterAgeDays: Math.floor((Date.now() - Date.parse(current.data.updated)) / 86400000),
           domainRules: current.block.length, sources: current.data.sources.map(s => s.name), lastUpdate: update,
           dnsUpstream: UPSTREAM }, { headers: { "Cache-Control": "no-store" } });

@@ -6,6 +6,7 @@ export const SOURCES = [
   { name: "EasyList", url: "https://easylist.to/easylist/easylist.txt" },
   { name: "HaGeZi Multi NORMAL", url: "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/multi.txt" },
   { name: "HaGeZi Pop-Up Ads", url: "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/popupads.txt" },
+  { name: "ABPVN", url: "https://raw.githubusercontent.com/abpvn/abpvn/master/filter/abpvn.txt" },
 ];
 
 export const MAX_DOMAIN_RULES = 300000;
@@ -32,8 +33,9 @@ export function parseRules(text, exceptionsOnly = false) {
     if (line.startsWith("!#if ")) { conditionalDepth++; continue; }
     if (line.startsWith("!#endif")) { conditionalDepth = Math.max(0, conditionalDepth - 1); continue; }
     if (conditionalDepth || !line || line.startsWith("!") || line.startsWith("[")) continue;
-    // Treat domain exceptions conservatively, even when the browser exception has conditions.
-    const exception = /^@@\|\|([a-z0-9.-]+)\^(?:\$.*)?$/i.exec(line);
+    // DNS cannot scope an exception to a page, resource type or first-party context.
+    // Promoting such an exception globally disables unrelated advertising blocks.
+    const exception = /^@@\|\|([a-z0-9.-]+)\^$/i.exec(line);
     if (exception && validDomain(exception[1].toLowerCase())) {
       allow.add(exception[1].toLowerCase()); continue;
     }

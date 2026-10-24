@@ -1,12 +1,12 @@
 # DNS Gọn Private
 
-Personal DNS-over-HTTPS on Cloudflare Workers Free, using the DNS-compatible domain rules from official uBlock filters, uBlock Quick fixes, uBlock Unbreak exceptions, EasyList, HaGeZi Multi NORMAL and HaGeZi Pop-Up Ads. GitHub Actions refreshes the filter data daily. No runtime npm dependencies.
+Personal DNS-over-HTTPS on Cloudflare Workers Free, using the DNS-compatible domain rules from official uBlock filters, uBlock Quick fixes, uBlock Unbreak exceptions, EasyList, HaGeZi Multi NORMAL, HaGeZi Pop-Up Ads and ABPVN for Vietnamese sites. GitHub Actions refreshes the filter data daily. No runtime npm dependencies.
 
 This is a newly written minimal DNS service. It is **not** the uBlockDNS server, an official uBlock Origin product, or the full uBlock browser engine. The public uBlockDNS repository only provides desktop clients; its server implementation was not available to download. Its client source was downloaded separately at commit `359f6ed99bed9cce7c7acc0654972ddb5d2706b6` for review. No uBlockDNS server binary or client daemon is run here.
 
 ## What gets blocked
 
-Only unconditional `||domain^` rules are converted into DNS blocks. Browser-specific options, paths, cosmetic filters, scriptlets, regex rules and conditional preprocessor branches are excluded. Domain exceptions, including contextual domain exceptions, are treated as global allow rules to reduce breakage. Unbreak contributes exceptions only. HaGeZi Multi NORMAL is the balanced tier; its dedicated Pop-Up Ads list extends coverage for advertising redirect hosts. This deliberately cannot reproduce full uBlock behavior or guarantee that every normal app feature will work.
+Only unconditional `||domain^` rules are converted into DNS blocks, and only unconditional `@@||domain^` exceptions become global allow rules. Browser-specific options, paths, cosmetic filters, scriptlets, regex rules and conditional preprocessor branches are excluded. Page-scoped exceptions cannot be represented by DNS and must not disable an advertising block globally. The owner allowlist and built-in app compatibility allowlist retain priority. Unbreak contributes unconditional exceptions only. HaGeZi Multi NORMAL is the balanced tier; its dedicated Pop-Up Ads list extends coverage for advertising redirect hosts. This deliberately cannot reproduce full uBlock behavior or guarantee that every normal app feature will work.
 
 `custom-blocklist.json` supplements the upstream lists with reviewed advertising hosts that they miss. These are merged into the daily feed, so they take effect without reinstalling the iOS profile or app. Match the narrowest advertising host: do not add an entire shared hosting platform, image CDN or content site just to block one ad URL. DNS cannot distinguish URL paths or stop a page's inline JavaScript from opening a new tab; a blocked destination can still leave an empty tab or overlay.
 

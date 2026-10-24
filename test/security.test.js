@@ -28,13 +28,25 @@ function answer(queryBytes) {
 test("browser-context rules, regexes, scripts and conditionals never become domain blocks", () => {
   const rules = parseRules("||ads.test^\n||needed.test^$third-party\n||media.test/path\n!#if env_firefox\n||conditional.test^\n!#else\n||other.test^\n!#endif\nexample.test##.ad\n@@||ads.test^$domain=example.test");
   assert.deepEqual(rules.block, ["ads.test"]);
-  assert.deepEqual(rules.allow, ["ads.test"]);
+  assert.deepEqual(rules.allow, []);
+});
+
+test("page-scoped exceptions cannot globally unblock an advertising domain", () => {
+  const parsed = parseRules("||ads.test^\n@@||ads.test^$domain=publisher.test\n@@||needed.test^");
+  const data = { ...fixtureData(), block: [...fixtureData().block, "needed.test"].sort(), allow: parsed.allow };
+  const state = compile(data);
+  assert.equal(isBlocked("ads.test", state), true);
+  assert.equal(isBlocked("sub.ads.test", state), true);
+  assert.equal(isBlocked("needed.test", state), false);
+  assert.equal(isBlocked("graph.facebook.com", state), false);
+  const restored = compile(data, ["ads.test"]);
+  assert.equal(isBlocked("ads.test", restored), false);
 });
 
 test("balanced DNS and pop-up sources are part of the reviewed daily feed", () => {
   assert.equal(MAX_DOMAIN_RULES, 300000);
-  assert.deepEqual(SOURCES.slice(-2).map(source => source.name), ["HaGeZi Multi NORMAL", "HaGeZi Pop-Up Ads"]);
-  for (const source of SOURCES.slice(-2)) {
+  assert.deepEqual(SOURCES.filter(source => source.name.startsWith("HaGeZi")).map(source => source.name), ["HaGeZi Multi NORMAL", "HaGeZi Pop-Up Ads"]);
+  for (const source of SOURCES.filter(source => source.name.startsWith("HaGeZi"))) {
     assert.equal(new URL(source.url).hostname, "raw.githubusercontent.com");
     assert.match(source.url, /^https:\/\/raw\.githubusercontent\.com\/hagezi\/dns-blocklists\/main\/adblock\//);
   }
