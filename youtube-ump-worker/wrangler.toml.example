@@ -1,0 +1,7 @@
+name = "dnsgon-youtube-ump"
+main = "src/index.js"
+compatibility_date = "2026-10-24"
+
+[vars]
+# Set this as a secret instead of committing it:
+# wrangler secret put AUTH_TOKEN
